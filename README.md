@@ -14,6 +14,7 @@ A web-based authoring and reading tool for branching CYOA stories, built as a fo
 
 - Kieran Moynihan (kiemoy@uw.edu)
 - Bennett
+- Simon Upton
 
 ---
 
