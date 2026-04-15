@@ -8,16 +8,16 @@
 
 ## P0 Foundation Tasks
 
-- [ ] P0-01 Define story fragment JSON schema in a new spec doc.
+- [x] P0-01 Define story fragment JSON schema in a new spec doc.
 - Acceptance criteria: Required fields documented (id, text, choices, metadata), one valid example and one invalid example.
 
-- [ ] P0-02 Define graph JSON schema derived from fragments.
+- [x] P0-02 Define graph JSON schema derived from fragments.
 - Acceptance criteria: Node and edge format documented, terminal node representation documented.
 
-- [ ] P0-03 Decide canonical project structure for web app folders.
+- [x] P0-03 Decide canonical project structure for web app folders.
 - Acceptance criteria: Folder layout documented (app, data, api, scripts bridge), rationale noted.
 
-- [ ] P0-04 Create minimal seed dataset from existing output for web MVP.
+- [x] P0-04 Create minimal seed dataset from existing output for web MVP.
 - Acceptance criteria: At least one small curated story subset is exported to structured JSON and committed.
 
 ## P1 Core Logic Tasks
@@ -61,7 +61,7 @@
 
 ## Documentation Tasks (Run After Each Completed Implementation Task)
 
-- [ ] DOC-01 Update Codebase.md with changed files and behavior deltas.
+- [x] DOC-01 Update Codebase.md with changed files and behavior deltas.
 - Acceptance criteria: Includes what changed, why, and any new caveats.
 
 ## Proposed First Implementation Task

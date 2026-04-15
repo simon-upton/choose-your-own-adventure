@@ -51,6 +51,18 @@
 - Rationale: Better supervision, easier review, lower rework risk.
 - Impact: ToDo.md will use small tasks (roughly 0.5 to 2 hours each).
 
+### Decision 4: Canonical Web Project Structure
+
+- Choice: Use a stack-agnostic layered structure with app/, api/, data/, and scripts-bridge/.
+- Rationale: Clean separation between UI, domain/API boundaries, data contracts/assets, and legacy-pipeline integration points.
+- Impact: Future implementation tasks should place files according to docs/web-project-structure.md.
+
+### Decision 5: Seed Dataset Scope For MVP Testing
+
+- Choice: Curate a small subset (8 fragments) from the existing OCR output for rapid iteration and testing.
+- Rationale: Avoids importing all 100+ pages upfront; reduces validation complexity; keeps MVP tests focused and fast.
+- Impact: Early implementation tasks (loaders, graph builders, traversal) can test against cot-minimal-subset.json before scaling to full dataset.
+
 ## Key Design Questions and Candidate Options
 
 ### 1) Story Data Model
