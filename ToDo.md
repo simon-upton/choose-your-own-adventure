@@ -22,30 +22,30 @@
 
 ## P1 Core Logic Tasks
 
-- [ ] P1-01 Implement fragment loader for the seed JSON format.
+- [x] P1-01 Implement fragment loader for the seed JSON format.
 - Acceptance criteria: Loader validates required fields and returns structured in-memory model.
 
-- [ ] P1-02 Implement graph builder from fragment model.
+- [x] P1-02 Implement graph builder from fragment model.
 - Acceptance criteria: Produces deterministic node/edge output and marks terminal fragments.
 
-- [ ] P1-03 Implement validation checks (dangling links, unreachable nodes, cycle report).
+- [x] P1-03 Implement validation checks (dangling links, unreachable nodes, cycle report).
 - Acceptance criteria: Validation output contains issue type, source id, and human-readable message.
 
-- [ ] P1-04 Implement traversal engine for interactive reader mode.
+- [x] P1-04 Implement traversal engine for interactive reader mode.
 - Acceptance criteria: Given a start id and choice index sequence, returns visited nodes in order.
 
 ## P1 UI Tasks (Authoring-first)
 
-- [ ] P1-05 Build basic author editor form (fragment text + choices).
+- [x] P1-05 Build basic author editor form (fragment text + choices).
 - Acceptance criteria: User can create/update one fragment in local data store.
 
-- [ ] P1-06 Build basic graph view panel.
+- [x] P1-06 Build basic graph view panel.
 - Acceptance criteria: Graph renders current fragments and updates after save.
 
-- [ ] P1-07 Build basic reader panel.
+- [x] P1-07 Build basic reader panel.
 - Acceptance criteria: User can start at configured node and progress by clicking choices.
 
-- [ ] P1-08 Show validation warnings in UI.
+- [x] P1-08 Show validation warnings in UI.
 - Acceptance criteria: Dangling links shown as blocking errors; other issues shown as warnings.
 
 ## P2 Output and Tooling Tasks
