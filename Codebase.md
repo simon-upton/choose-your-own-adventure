@@ -179,3 +179,28 @@ When resuming work:
 - The seed contains 8 fragments (pages 2, 3, 4, 5, 6, 16, 22, 114) extracted and reformatted from output/cot-pages-ocr-v2, forming a small representative branching story.
 - Follows the JSON fragment schema defined in docs/story-fragment-schema.md.
 - Created data/ folder structure per docs/web-project-structure.md.
+
+### 2026-04-14 (continued — P1 implementation)
+
+- Completed all P1 Core Logic and P1 UI tasks.
+
+**New files — api/services/ (core logic, ES modules, stack-agnostic):**
+- api/services/fragmentLoader.js — P1-01: validates raw JSON arrays against the fragment schema; throws ValidationError with per-field details; returns normalized fragment objects.
+- api/services/graphBuilder.js — P1-02: builds a graph object (per story-graph-schema.md) from validated fragments; output is deterministic (sorted by id); marks terminal nodes.
+- api/services/validator.js — P1-03: checks dangling-link, unreachable-node, and cycle issues; each issue has {type, sourceId, message}.
+- api/services/traversalEngine.js — P1-04: given a graph, startId, and array of zero-based choice indices, returns visited GraphNode[] in order; stops gracefully at terminal nodes.
+
+**New files — app/ (web UI):**
+- app/index.html — Three-panel SPA: author editor (left), graph view (center), validation + reader (right). Loads seed data on startup. Requires a local HTTP server (e.g. `python3 -m http.server` from repo root).
+- app/shared/store.js — In-memory store with subscriber pattern; calls loadFragments/buildGraph/validate on every mutation.
+- app/shared/seedData.js — Inline seed fragments as a JS export (avoids fetch/CORS issues on file:// protocol).
+- app/author/editor.js — P1-05: fragment editor form; create/update/delete; clicking any item in the fragment list populates the form.
+- app/graph/graphView.js — P1-06: SVG graph with BFS-layered layout; start node highlighted green, terminal nodes red; click a node to load it in the editor; updates after every save.
+- app/reader/reader.js — P1-07: interactive story reader; select start node, click choices to advance; shows breadcrumb path; "The End" screen at terminal nodes.
+- Validation panel in index.html (P1-08): dangling-link issues shown as red blocking errors; unreachable-node and cycle issues shown as amber warnings; header badge shows overall health.
+
+**How to run the web app:**
+```bash
+python3 -m http.server 8080 --directory /path/to/choose-your-own-adventure
+# then open http://localhost:8080/app/
+```
