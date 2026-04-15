@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CYOA Authoring Tool</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- D3.js for graph visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="app-logo">
+      <span class="logo-icon">📖</span>
+      CYOA Authoring Tool
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab" data-panel="author">✏️ Author</button>
+      <button class="nav-tab" data-panel="graph">🗺️ Story Graph</button>
+      <button class="nav-tab" data-panel="reader">📚 Reader</button>
+      <button class="nav-tab" data-panel="validation">🔍 Validate <span id="validation-badge" class="badge" style="display:none"></span></button>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm" id="load-json-btn">📂 Load JSON</button>
+      <input type="file" id="load-json-input" accept=".json" style="display:none" />
+      <div style="position:relative">
+        <button class="btn btn-primary btn-sm" id="export-menu-btn" onclick="document.getElementById('export-dropdown').style.display = document.getElementById('export-dropdown').style.display === 'block' ? 'none' : 'block'">
+          ⬇ Export ▾
+        </button>
+        <div id="export-dropdown" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);z-index:200;min-width:180px">
+          <button class="btn btn-secondary" id="export-json-btn" style="width:100%;border-radius:0;border:none;justify-content:flex-start;padding:10px 16px;">📄 Fragments JSON</button>
+          <button class="btn btn-secondary" id="export-mmd-btn" style="width:100%;border-radius:0;border:none;justify-content:flex-start;padding:10px 16px;">📊 Mermaid Graph</button>
+          <button class="btn btn-secondary" id="export-graph-json-btn" style="width:100%;border-radius:0;border:none;justify-content:flex-start;padding:10px 16px;">🔗 Graph JSON</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="app-body">
+
+  <!-- ===== AUTHOR PANEL ===== -->
+  <section class="panel" id="panel-author">
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-fragments">0</div>
+        <div class="stat-label">Fragments</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-terminal">0</div>
+        <div class="stat-label">Terminal Nodes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-choices">0</div>
+        <div class="stat-label">Total Choices</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-authors">0</div>
+        <div class="stat-label">Authors</div>
+      </div>
+    </div>
+
+    <!-- Two-column layout: fragment list + editor -->
+    <div class="two-col">
+      <!-- Fragment list -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Fragments</span>
+          <button class="btn btn-accent btn-sm" id="new-fragment-btn">+ New</button>
+        </div>
+        <div class="card-body" style="padding:12px">
+          <div class="search-row" style="margin-bottom:10px">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="form-input search-input" id="fragment-search" placeholder="Search fragments..." />
+          </div>
+          <div id="fragment-list" class="fragment-list scroll-area" style="max-height:520px">
+            <!-- populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor form -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">✏️ Edit Fragment</span>
+        </div>
+        <div class="card-body scroll-area" style="max-height:620px">
+          <div id="editor-form">
+            <!-- populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GRAPH PANEL ===== -->
+  <section class="panel" id="panel-graph">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🗺️ Story Graph</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="text-muted" style="font-size:0.8rem">Scroll to zoom · Drag to pan · Click node to edit</span>
+          <button class="btn btn-secondary btn-sm" id="graph-recenter-btn">↺ Refresh</button>
+        </div>
+      </div>
+      <div id="graph-svg-container">
+        <!-- D3 graph rendered here -->
+      </div>
+    </div>
+    <div class="graph-legend">
+      <div class="legend-item"><div class="legend-dot start"></div> Start node</div>
+      <div class="legend-item"><div class="legend-dot terminal"></div> Terminal node</div>
+      <div class="legend-item"><div class="legend-dot trunk"></div> Main trunk</div>
+      <div class="legend-item"><div class="legend-dot default"></div> Branch node</div>
+    </div>
+  </section>
+
+  <!-- ===== READER PANEL ===== -->
+  <section class="panel" id="panel-reader">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div class="form-group" style="margin:0;flex-direction:row;align-items:center;gap:8px">
+        <label class="form-label" style="white-space:nowrap;margin:0">Start from:</label>
+        <select class="form-select" id="reader-start-select" style="width:auto;min-width:220px">
+          <!-- populated by JS -->
+        </select>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="reader-restart-btn">↺ Restart</button>
+    </div>
+
+    <div class="reader-layout">
+      <!-- Current fragment + choices -->
+      <div id="reader-content">
+        <!-- populated by JS -->
+      </div>
+
+      <!-- Reading history -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🕓 Path History</span>
+        </div>
+        <div class="card-body" style="padding:8px">
+          <div id="history-content">
+            <!-- populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VALIDATION PANEL ===== -->
+  <section class="panel" id="panel-validation">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🔍 Story Validation</span>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('run-validation-btn').click()">▶ Re-run</button>
+      </div>
+      <div class="card-body">
+        <p class="text-muted" style="margin-bottom:16px;font-size:0.875rem">
+          Checks for dangling links (choices pointing to missing fragments), unreachable nodes,
+          and cycles. Errors must be fixed before the reader will work correctly.
+        </p>
+        <div id="validation-content">
+          <!-- populated by JS -->
+        </div>
+        <button id="run-validation-btn" style="display:none"></button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast notifications -->
+<div id="toast-container"></div>
+
+<!-- Close export dropdown on click outside -->
+<script>
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('export-dropdown');
+    if (!e.target.closest('#export-menu-btn') && !e.target.closest('#export-dropdown')) {
+      dropdown.style.display = 'none';
+    }
+  });
+  document.getElementById('run-validation-btn')?.addEventListener('click', () => {
+    // trigger re-render from app.js
+  });
+</script>
+
+<!-- Main application (ES modules) -->
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
