@@ -13,7 +13,7 @@ A web-based authoring and reading tool for branching CYOA stories, built as a fo
 ## 👥 Team Members
 
 - Kieran Moynihan (kiemoy@uw.edu)
-- *(Add your teammates here)*
+- Bennett
 
 ---
 
