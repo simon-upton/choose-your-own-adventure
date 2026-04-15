@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CYOA Authoring Tool</title>
+  <style>
+    /* --- reset & base --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* --- header --- */
+    header {
+      background: #1a1a2e;
+      color: #eee;
+      padding: 0 16px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.5px; }
+    #header-status { margin-left: auto; font-size: 12px; }
+    #header-status.has-errors { color: #ff6b6b; font-weight: 600; }
+    #header-status.has-warnings { color: #ffc107; }
+    #header-status.clean { color: #69db7c; }
+
+    /* --- main layout: three columns --- */
+    .workspace {
+      display: grid;
+      grid-template-columns: 320px 1fr 320px;
+      flex: 1;
+      overflow: hidden;
+      gap: 0;
+    }
+    .panel {
+      overflow-y: auto;
+      padding: 12px;
+      border-right: 1px solid #ddd;
+    }
+    .panel:last-child { border-right: none; }
+    .panel h2 { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #333; }
+    .panel h3 { font-size: 13px; font-weight: 600; margin: 12px 0 6px; color: #555; }
+
+    /* --- validation panel (P1-08) --- */
+    #validation-panel { background: #fff; }
+    .validation-issue {
+      padding: 8px 10px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .validation-issue.error {
+      background: #ffe0e0;
+      border-left: 3px solid #d63031;
+      color: #c0392b;
+    }
+    .validation-issue.warning {
+      background: #fff8e1;
+      border-left: 3px solid #f39c12;
+      color: #856404;
+    }
+    .issue-type {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .no-issues {
+      color: #2d9e5f;
+      font-size: 13px;
+      padding: 8px 0;
+    }
+
+    /* --- editor panel (P1-05) --- */
+    .editor-panel { background: #fff; }
+    .field-row { margin-bottom: 8px; }
+    .field-row label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 3px;
+    }
+    .required { color: #d63031; }
+    .field-row input, .field-row textarea, .field-row select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .field-row textarea { resize: vertical; }
+    .field-row input:focus, .field-row textarea:focus {
+      outline: none;
+      border-color: #4c6ef5;
+      box-shadow: 0 0 0 2px rgba(76,110,245,0.15);
+    }
+    .choices-section { margin-bottom: 10px; }
+    .choices-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+    }
+    .choice-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+    .choice-row input { flex: 1; padding: 5px 7px; font-size: 12px; }
+    .choice-row input.choice-target { flex: 0 0 70px; }
+    .remove-choice-btn {
+      background: none;
+      border: none;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 4px;
+    }
+    .remove-choice-btn:hover { color: #d63031; }
+    .editor-actions { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+    .editor-status { font-size: 12px; min-height: 18px; }
+    .editor-status.error { color: #d63031; }
+    .editor-status.success { color: #2d9e5f; }
+    .fragment-list-section { border-top: 1px solid #eee; padding-top: 10px; margin-top: 4px; }
+    .fragment-list-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-bottom: 2px;
+    }
+    .fragment-list-item:hover { background: #f0f4ff; }
+    .frag-id { font-weight: 700; color: #4c6ef5; min-width: 26px; }
+    .frag-title { flex: 1; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .terminal-badge {
+      font-size: 10px;
+      background: #eee;
+      color: #666;
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+    .choice-count { font-size: 10px; color: #888; }
+
+    /* --- graph panel (P1-06) --- */
+    #graph-panel { background: #fafafa; overflow: auto; }
+    .graph-panel h2 { position: sticky; top: 0; background: #fafafa; padding-bottom: 6px; z-index: 1; }
+    #svg-wrap { overflow: auto; }
+    .story-graph-svg { display: block; }
+    .node-rect {
+      fill: #e8f0fe;
+      stroke: #4c6ef5;
+      stroke-width: 1.5;
+    }
+    .graph-node.terminal .node-rect {
+      fill: #fce8e8;
+      stroke: #d63031;
+    }
+    .graph-node.start-node .node-rect {
+      fill: #e8f8ef;
+      stroke: #2d9e5f;
+      stroke-width: 2;
+    }
+    .graph-node:hover .node-rect { opacity: 0.85; }
+    .node-label {
+      font-size: 11px;
+      fill: #1a1a1a;
+      pointer-events: none;
+    }
+    .edge-path { stroke: #999; stroke-width: 1.5; }
+    .edge-label { font-size: 9px; fill: #666; }
+
+    /* --- reader panel (P1-07) --- */
+    .reader-panel { background: #fff; }
+    .reader-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .reader-controls label { font-size: 12px; font-weight: 600; color: #555; }
+    .reader-controls select { padding: 5px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
+    .reader-content { font-size: 13px; line-height: 1.6; }
+    .reader-history { font-size: 11px; color: #888; margin-bottom: 10px; }
+    .path-node { background: #eef; border-radius: 3px; padding: 0 4px; margin: 0 1px; }
+    .path-node.current { background: #4c6ef5; color: #fff; }
+    .fragment-text { margin-bottom: 14px; }
+    .fragment-text p { margin-bottom: 8px; }
+    .choices-label { font-weight: 600; font-size: 12px; color: #555; margin-bottom: 8px; }
+    .choice-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 9px 12px;
+      margin-bottom: 6px;
+      border: 1px solid #4c6ef5;
+      border-radius: 5px;
+      background: #f0f4ff;
+      color: #1a1a1a;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .choice-btn:hover { background: #dce5ff; }
+    .terminal-msg { font-style: italic; color: #888; margin-bottom: 10px; }
+    .reader-terminal { padding: 10px 0; }
+
+    /* --- shared button styles --- */
+    button.btn-primary {
+      background: #4c6ef5; color: #fff; border: none;
+      padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;
+    }
+    button.btn-primary:hover { background: #3b5bdb; }
+    button.btn-secondary {
+      background: #e9ecef; color: #333; border: 1px solid #ccc;
+      padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;
+    }
+    button.btn-secondary:hover { background: #dee2e6; }
+    button.btn-danger {
+      background: #fff0f0; color: #d63031; border: 1px solid #ffa8a8;
+      padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;
+    }
+    button.btn-danger:hover { background: #ffe0e0; }
+    #add-choice-btn {
+      background: none; border: 1px solid #4c6ef5; color: #4c6ef5;
+      padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;
+    }
+    #add-choice-btn:hover { background: #f0f4ff; }
+
+    /* --- misc --- */
+    .empty-state { color: #aaa; font-style: italic; font-size: 13px; padding: 8px 0; }
+    .reader-msg { color: #555; font-size: 13px; }
+    .load-error { color: #d63031; font-size: 12px; padding: 8px; background: #ffe0e0; border-radius: 4px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CYOA Authoring Tool</h1>
+    <div id="header-status">Loading…</div>
+  </header>
+
+  <div class="workspace">
+    <!-- Left: Editor (P1-05) -->
+    <div class="panel" id="editor-container"></div>
+
+    <!-- Center: Graph (P1-06) -->
+    <div class="panel" id="graph-panel"></div>
+
+    <!-- Right: Validation (P1-08) + Reader (P1-07) -->
+    <div class="panel" id="right-panel">
+      <div id="validation-container"></div>
+      <hr style="margin: 12px 0; border: none; border-top: 1px solid #eee;" />
+      <div id="reader-container"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { store } from './shared/store.js';
+    import { SEED_FRAGMENTS } from './shared/seedData.js';
+    import { mountEditor } from './author/editor.js';
+    import { mountGraphView } from './graph/graphView.js';
+    import { mountReader } from './reader/reader.js';
+
+    // --- Mount panels ---
+    const editorContainer = document.getElementById('editor-container');
+    const graphPanel = document.getElementById('graph-panel');
+    const validationContainer = document.getElementById('validation-container');
+    const readerContainer = document.getElementById('reader-container');
+
+    mountEditor(editorContainer);
+    mountGraphView(graphPanel, {
+      onNodeClick: (nodeId) => {
+        const frag = store.fragments.find(f => f.id === nodeId);
+        if (frag) {
+          // Import editor helpers lazily to avoid circular dep
+          import('./author/editor.js').then(({ editFragment }) => {
+            editFragment(editorContainer, frag);
+          });
+        }
+      }
+    });
+    mountReader(readerContainer);
+
+    // --- Validation panel (P1-08) ---
+    function renderValidation() {
+      const issues = store.issues;
+      const loadError = store.loadError;
+      const headerStatus = document.getElementById('header-status');
+
+      let html = '<h2>Validation</h2>';
+
+      if (loadError) {
+        html += `<div class="load-error">Load error: ${escHtml(loadError.message)}</div>`;
+        if (loadError.details && loadError.details.length > 0) {
+          for (const d of loadError.details) {
+            html += `<div class="validation-issue error">
+              <span class="issue-type">load error</span>
+              Fragment index ${d.index} (id: ${escHtml(String(d.id ?? '?'))}): ${d.errors.map(escHtml).join('; ')}
+            </div>`;
+          }
+        }
+        headerStatus.textContent = 'Load error';
+        headerStatus.className = 'has-errors';
+        validationContainer.innerHTML = html;
+        return;
+      }
+
+      if (issues.length === 0) {
+        html += '<p class="no-issues">✓ No issues found.</p>';
+        headerStatus.textContent = `${store.fragments.length} fragment(s) — clean`;
+        headerStatus.className = 'clean';
+      } else {
+        const errors = issues.filter(i => i.type === 'dangling-link');
+        const warnings = issues.filter(i => i.type !== 'dangling-link');
+
+        if (errors.length > 0) {
+          headerStatus.textContent = `${errors.length} error(s), ${warnings.length} warning(s)`;
+          headerStatus.className = 'has-errors';
+        } else {
+          headerStatus.textContent = `${warnings.length} warning(s)`;
+          headerStatus.className = 'has-warnings';
+        }
+
+        for (const issue of issues) {
+          // P1-08: dangling links are blocking errors; others are warnings
+          const severity = issue.type === 'dangling-link' ? 'error' : 'warning';
+          html += `<div class="validation-issue ${severity}">
+            <span class="issue-type">${escHtml(issue.type)}</span>
+            ${escHtml(issue.message)}
+          </div>`;
+        }
+      }
+
+      validationContainer.innerHTML = html;
+    }
+
+    store.subscribe(renderValidation);
+
+    // --- Load seed data ---
+    store.loadRaw(SEED_FRAGMENTS);
+    renderValidation();
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
