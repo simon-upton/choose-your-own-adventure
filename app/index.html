@@ -35,6 +35,21 @@
     #header-status.has-warnings { color: #ffc107; }
     #header-status.clean { color: #69db7c; }
 
+    /* --- export button --- */
+    #export-mmd-btn {
+      margin-left: 12px;
+      padding: 4px 12px;
+      background: #4c6ef5;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #export-mmd-btn:hover { background: #3b5bdb; }
+
     /* --- main layout: three columns --- */
     .workspace {
       display: grid;
@@ -255,6 +270,7 @@
   <header>
     <h1>CYOA Authoring Tool</h1>
     <div id="header-status">Loading…</div>
+    <button id="export-mmd-btn">⬇ Export .mmd</button>
   </header>
 
   <div class="workspace">
@@ -278,6 +294,7 @@
     import { mountEditor } from './author/editor.js';
     import { mountGraphView } from './graph/graphView.js';
     import { mountReader } from './reader/reader.js';
+    import { downloadMermaid } from '../api/services/mermaidExport.js';
 
     // --- Mount panels ---
     const editorContainer = document.getElementById('editor-container');
@@ -298,6 +315,15 @@
       }
     });
     mountReader(readerContainer);
+
+    // --- Export .mmd (P2-01) ---
+    document.getElementById('export-mmd-btn').addEventListener('click', () => {
+      if (!store.graph) {
+        alert('No graph to export. Add some fragments first.');
+        return;
+      }
+      downloadMermaid(store.graph);
+    });
 
     // --- Validation panel (P1-08) ---
     function renderValidation() {

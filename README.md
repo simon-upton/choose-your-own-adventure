@@ -1,61 +1,120 @@
-# choose-your-own-adventure
+# Choose Your Own Adventure — Authoring Tool
 
-## Build Story Graph
+A web-based authoring and reading tool for branching CYOA stories, built as a fork of [pisan382/choose-your-own-adventure](https://github.com/pisan382/choose-your-own-adventure).
 
-Run:
+## 🌐 Live Site
 
-```bash
-python3 scripts/build_story_graph.py \
-	--pages-dir output/cot-pages-ocr-v2 \
-	--output output/cot-story-graph.mmd
+> **Deployed URL:** `https://kieranmoy.github.io/cyoa_origin/`
+
+## 📂 Repository
+
+> **GitHub Repository:** `https://github.com/KieranMoy/cyoa_origin`
+
+## 👥 Team Members
+
+- Kieran Moynihan (kiemoy@uw.edu)
+- *(Add your teammates here)*
+
+---
+
+## What This Does
+
+The app has four tabs:
+
+- **Author** — Create, edit, and delete story fragments. Each fragment has text, choices that link to other fragments, and metadata. Search fragments, manage choices, set the start node.
+- **Story Graph** — Interactive D3.js force-directed graph of all fragments. Nodes are color-coded (green = start, orange = terminal, purple = main trunk, blue = branch). Click a node to jump to its editor. Zoom, pan, drag.
+- **Reader** — Interactively read through the story by clicking choices. Tracks your path history. Handles terminal endings, cycles, and depth limits gracefully.
+- **Validate** — Checks for dangling links (choices pointing to non-existent fragments), unreachable nodes, and cycles. Errors and warnings appear with badges in the nav.
+
+You can **load** your own fragment JSON and **export** fragments, Mermaid graphs, and graph JSON at any time.
+
+---
+
+## Project Structure
+
+```
+.
+├── app/                        ← Web application (deployed to GitHub Pages)
+│   ├── index.html              ← Entry point
+│   ├── css/style.css           ← All styling
+│   ├── js/
+│   │   ├── app.js              ← Boot, global state, routing, exports
+│   │   ├── services/
+│   │   │   ├── fragmentLoader.js   ← JSON validation and loading
+│   │   │   ├── graphBuilder.js     ← Node/edge graph construction
+│   │   │   ├── validator.js        ← Story integrity checks
+│   │   │   └── traversalEngine.js  ← Reader traversal engine
+│   │   └── components/
+│   │       ├── authorEditor.js     ← Author tab UI
+│   │       ├── graphView.js        ← D3 graph visualization
+│   │       ├── readerPanel.js      ← Reader tab UI
+│   │       └── validationPanel.js  ← Validation tab UI
+│   └── data/seed/
+│       └── cot-minimal-subset.json ← 8-fragment seed story
+├── data/                       ← Source data assets
+├── docs/                       ← Schema documentation
+├── output/                     ← Python pipeline outputs (story graph, OCR pages)
+├── scripts/                    ← Python pipeline scripts
+├── .github/workflows/
+│   └── deploy.yml              ← GitHub Pages auto-deploy on push to main
+├── AI-Instructions.md          ← Human-authored AI session log
+├── Brainstorm.md               ← Planning and decision log
+├── Codebase.md                 ← Architecture and state notes for AI continuity
+└── ToDo.md                     ← Implementation task backlog
 ```
 
-Generated output:
+---
 
-- `output/cot-story-graph.mmd`: Mermaid graph of branching story transitions from the corrected OCR v2 page set
+## Running Locally
 
-## Generate All Story Variants
-
-Run:
+The app is plain HTML/JS with no build step. Just serve the `app/` folder:
 
 ```bash
-python3 scripts/write_all_stories.py
+# Python (built-in)
+cd app
+python3 -m http.server 8080
+# then open http://localhost:8080
 ```
 
-Generated outputs:
+> **Note:** You must use a local server (not open `index.html` directly as `file://`) because ES modules and `fetch()` require HTTP.
 
-- `output/cot-stories/story-0001.txt` (and additional numbered files): one complete path per file
-- `output/cot-stories/manifest.json`: index of generated story files and page paths
+---
 
-Optional flags:
+## Deploying to GitHub Pages
 
-```bash
-python3 scripts/write_all_stories.py \
-	--graph output/cot-story-graph.mmd \
-	--pages-dir output/cot-pages-ocr-v2 \
-	--output-dir output/cot-stories \
-	--start-page 2 \
-	--max-decisions 20
-```
+1. Fork this repo.
+2. Go to **Settings → Pages → Source** and select **GitHub Actions**.
+3. Push to the `main` branch.
+4. The workflow in `.github/workflows/deploy.yml` will automatically deploy `app/` to `https://<username>.github.io/<reponame>/`.
+5. Update the **Live Site** URL in this README.
 
-## Re-Extract From Spread-Scanned PDF
+---
 
-The book scan is a two-page spread layout. The story starts on the left side of PDF page 8:
+## Working With Story Data
 
-- PDF page 8 -> story pages 2 and 3
-- PDF page 9 -> story pages 4 and 5
+The seed data lives at `app/data/seed/cot-minimal-subset.json`. It contains 8 fragments from *The Cave of Time*.
 
-Run:
+To add more fragments from the Python pipeline, see `Codebase.md` for the full commands.
 
-```bash
-python3 scripts/reextract_cot_ocr_split.py \
-	--pdf samples/the-cave-of-time.pdf \
-	--pdf-start-page 8 \
-	--pdf-end-page 66 \
-	--story-start-page 2 \
-	--output-dir output/cot-pages-ocr-v2
-```
+---
 
-Generated output:
+## Contributing
 
-- `output/cot-pages-ocr-v2/*.txt`: OCR re-extraction using left/right half-page splitting
+Each team member should:
+
+1. Fork this repo (or be added as a collaborator).
+2. Create a feature branch for your work.
+3. Open a pull request to `main`.
+4. Every team member must have at least one commit on the main branch (check `https://github.com/KieranMoy/cyoa_origin/commits/main`).
+
+---
+
+## AI Methodology
+
+This project uses AI-assisted development:
+
+- Human writes intentions into `AI-Instructions.md` (AI does not edit this file).
+- AI reads `Codebase.md` to understand current project state before starting work.
+- AI reads `ToDo.md` for the task backlog and updates it after completing tasks.
+- AI reads `Brainstorm.md` for design decisions and constraints.
+- After each session, AI updates `Codebase.md` with what changed.
