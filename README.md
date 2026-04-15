@@ -4,15 +4,11 @@ A web-based authoring and reading tool for branching CYOA stories, built as a fo
 
 ## 🌐 Live Site
 
-> **Deployed URL:** `https://<YOUR-GITHUB-USERNAME>.github.io/<YOUR-REPO-NAME>/`
->
-> *(Update this link after your first GitHub Pages deployment.)*
+> **Deployed URL:** `https://kieranmoy.github.io/cyoa_origin/`
 
 ## 📂 Repository
 
-> **GitHub Repository:** `https://github.com/<YOUR-GITHUB-USERNAME>/<YOUR-REPO-NAME>`
->
-> *(Update this link with your forked repo URL.)*
+> **GitHub Repository:** `https://github.com/KieranMoy/cyoa_origin`
 
 ## 👥 Team Members
 
@@ -109,7 +105,7 @@ Each team member should:
 1. Fork this repo (or be added as a collaborator).
 2. Create a feature branch for your work.
 3. Open a pull request to `main`.
-4. Every team member must have at least one commit on the main branch (check `https://github.com/<username>/<repo>/commits/main`).
+4. Every team member must have at least one commit on the main branch (check `https://github.com/KieranMoy/cyoa_origin/commits/main`).
 
 ---
 
